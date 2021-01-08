@@ -9,4 +9,4 @@ Creates a variable length string in X-URL-Callback formatting which then creates
 
 ## AreaCheck.sol
 
-Proof of concept for a smart contract to check area availability for carbon offsetting written in solidity
+Proof of concept for a smart contract to check area availability for carbon offsetting
