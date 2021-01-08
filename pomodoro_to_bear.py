@@ -123,7 +123,7 @@ def create_pomodoro(end_time, cycle):
 
                     cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+begin_time.strftime('%H:%M')+'-'+\
                                 cycle_end_time.strftime('%H:%M')+\
-                                '%0A%0A%0A%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
+                                '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
                                 cycle_end_time.strftime('%H:%M')
 
                     # changing times with +60min because of longer break
@@ -131,7 +131,7 @@ def create_pomodoro(end_time, cycle):
 
                     # also, make this statement bold at the same time
                     cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+'%20-%3E%20'+\
-                        '*'+break_elem+'*'+'%3A%3A%0A---%0A'
+                        '*'+break_elem+'*'+'%3A%3A'
 
                     cycle_end_time = cycle_end_time + pd.Timedelta(minutes=60)
 
@@ -144,14 +144,14 @@ def create_pomodoro(end_time, cycle):
                     # concatenate string with hh:mm from timestamp, +25min and +5 for break
                     cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+begin_time.strftime('%H:%M')+'-'+\
                                 cycle_end_time.strftime('%H:%M')+\
-                                '%0A%0A%0A%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
+                                '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
                                 cycle_end_time.strftime('%H:%M')
 
                     # setting times forward for next cycle
                     begin_time = begin_time + pd.Timedelta(minutes=30)
 
                     cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+'%20-%3E%20'+\
-                        break_elem+'%3A%3A%0A---%0A'
+                        break_elem+'%3A%3A'
 
                     cycle_end_time = cycle_end_time + pd.Timedelta(minutes=30)
 
