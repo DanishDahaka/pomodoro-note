@@ -42,7 +42,8 @@ breaks = [pushup_break,pull_up_break,front_lever_break]
 
 def create_pomodoro(end_time, cycle):
 
-    """takes an end date and creates cycles from right now (normalized to the min) until the end date.
+    """takes an end date and creates cycles from right now (normalized to
+    a 5-minute time) until the end date.
 
     Args:
         end_date    (string): time in format "hh:mm", e.g. "20:30"
@@ -80,9 +81,9 @@ def create_pomodoro(end_time, cycle):
     print('titledate:',titledate)
 
     # creating new timestamp based on end_time; format of end_time == '20:30'
-    end_time = pd.Timestamp(
-                            year = year, month= month, day = day, 
-                            hour = int(end_time[:2]), minute = int(end_time[3:])
+    end_time = pd.Timestamp(year = year, month= month, day = day, 
+                            hour = int(end_time[:2]), 
+                            minute = int(end_time[3:])
                             )
 
     print('this is end time: ', end_time)
@@ -142,19 +143,20 @@ def create_pomodoro(end_time, cycle):
                     
                     break_elem = longer_break
 
-                    cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+begin_time.strftime('%H:%M')+'-'+\
+                    cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+\
+                                begin_time.strftime('%H:%M')+'-'+\
                                 cycle_end_time.strftime('%H:%M')+\
                                 '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
                                 cycle_end_time.strftime('%H:%M')
 
-                    # changing times with +60min because of longer break
-                    begin_time = begin_time + pd.Timedelta(minutes=60)
+                    # changing times with +50min due to 25min doing and 25min break
+                    begin_time = begin_time + pd.Timedelta(minutes=50)
 
                     # also, make this statement bold at the same time
-                    cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+'%20-%3E%20'+\
-                        '*'+break_elem+'*'+'%3A%3A'
+                    cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+\
+                        '%20-%3E%20'+'*'+break_elem+'*'+'%3A%3A'
 
-                    cycle_end_time = cycle_end_time + pd.Timedelta(minutes=60)
+                    cycle_end_time = cycle_end_time + pd.Timedelta(minutes=50)
 
                     content = content + cycle_content
 
@@ -162,8 +164,9 @@ def create_pomodoro(end_time, cycle):
                 else:
                     
                     break_elem = breaks[j]
-                    # concatenate string with hh:mm from timestamp, +25min and +5 for break
-                    cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+begin_time.strftime('%H:%M')+'-'+\
+                    # concatenate string with hh:mm from timestamp; +25min, +5 for break
+                    cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+\
+                                begin_time.strftime('%H:%M')+'-'+\
                                 cycle_end_time.strftime('%H:%M')+\
                                 '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
                                 cycle_end_time.strftime('%H:%M')
@@ -171,8 +174,8 @@ def create_pomodoro(end_time, cycle):
                     # setting times forward for next cycle
                     begin_time = begin_time + pd.Timedelta(minutes=30)
 
-                    cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+'%20-%3E%20'+\
-                        break_elem+'%3A%3A'
+                    cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+\
+                        '%20-%3E%20'+break_elem+'%3A%3A'
 
                     cycle_end_time = cycle_end_time + pd.Timedelta(minutes=30)
 
@@ -196,12 +199,15 @@ def create_pomodoro(end_time, cycle):
     Set the pomodoro timer (traditionally to 25 minutes).[1]
     Work on the task.
     End work when the timer rings and put a checkmark on a piece of paper.[5]
-    If you have fewer than four checkmarks, take a short break (3–5 minutes) and then return to step 2; otherwise continue to step 6.
-    After four pomodoros, take a longer break (15–30 minutes), reset your checkmark count to zero, then go to step 1."""
+    If you have fewer than four checkmarks, take a short break (3–5 minutes) and then 
+    return to step 2; otherwise continue to step 6.
+    After four pomodoros, take a longer break (15–30 minutes), reset your checkmark 
+    count to zero, then go to step 1."""
 
 
 
 #### creating the final note ####
+
 
 print('Welcome to Pomodoro.py with a flexible note time. '+\
     '\nThe options for cycles are "25min" for now.') #"60min" and "90min" for now.')
