@@ -64,6 +64,17 @@ def create_pomodoro(end_time, cycle):
     month = begin_time.month
     day = begin_time.day
 
+    # prepare strings for adding tag "diary/yyyy/mm/dd"
+    if day < 10:
+        day_prefix_zero = '0'+str(day) 
+    else:
+        day_prefix_zero = str(day)
+
+    if month < 10:
+        month_prefix_zero = '0'+str(month) 
+    else:
+        month_prefix_zero = str(month)
+
     # create dd.mm.yyyy string from current date
     titledate = str(day)+'.'+str(month)+'.'+str(year)
     print('titledate:',titledate)
@@ -83,13 +94,19 @@ def create_pomodoro(end_time, cycle):
 
     title_continue = begin + titledate +'%20'
 
+    # dependency here on 25mins, change once 60/90mins are in the game!
     standard_content = '%20cycle&open_note=yes&text=%23pom'+\
-            'odoro%2F25mins%0A---%0AFlow%3A%5B%5BPomodoro%20-%20Technique%5D%5D'+\
-                '%0A---%0A%23%23%20Summary'+'%0A'
+        'odoro%2F25min'+space+hashtag+'diary'+slash+str(year)+slash+\
+            month_prefix_zero+slash+day_prefix_zero+\
+            '%0A---%0AFlow%3A%5B%5BPomodoro%20-%20Technique%5D%5D'+\
+            '%0A---%0A%23%23%20Summary%0A'
 
     if cycle == '90min':
+        
+        # adjust tag inside the string
+        standard_content = standard_content.replace('25min','90min')
 
-        content = title_continue + '90mins' + standard_content
+        content = title_continue + '90min' + standard_content
 
         # 1 pomodoro == 90min, how many mins break?
         #amount_cycles = 
@@ -97,7 +114,10 @@ def create_pomodoro(end_time, cycle):
 
     elif cycle == '60min':
 
-        content = title_continue + '60mins' + standard_content
+        # adjust tag inside the string
+        standard_content = standard_content.replace('25min','60min')
+
+        content = title_continue + '60min' + standard_content
 
         # 1 pomodoro == 60min, how many mins break?
         #amount_cycles =
@@ -105,9 +125,10 @@ def create_pomodoro(end_time, cycle):
 
     elif cycle == '25min':
 
-        # 1 pomodoro == 25min, 5 min break, thus 30min cycle
-        content = title_continue + '25mins' + standard_content
+        
+        content = title_continue + '25min' + standard_content
 
+        # 1 pomodoro == 25min, 5 min break, thus 30min cycle
         amount_cycles = round(timediff_mins/30)
         print('amount_cycles: ',amount_cycles)
 
@@ -182,11 +203,12 @@ def create_pomodoro(end_time, cycle):
 
 #### creating the final note ####
 
+print('Welcome to Pomodoro.py with a flexible note time. '+\
+    '\nThe options for cycles are "25min" for now.') #"60min" and "90min" for now.')
 
-print('Welcome to Pomodoro.py as a flexible note time. '+\
-    '\nThe options for cycles are "25min" for now') #"60min" and "90min" for now.')
+user_input = input('Please enter a time (e.g. "20:30") when you want to be done.\n')
 
 # opens browser and enters x-url-callback string
-webbrowser.open(create_pomodoro('20:30','25min'))
+webbrowser.open(create_pomodoro(user_input,'25min'))
 
 #create_pomodoro('20:30','25min')
