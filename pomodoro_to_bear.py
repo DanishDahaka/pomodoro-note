@@ -139,6 +139,8 @@ def create_pomodoro(end_time, cycle):
 
         for i in range(1,amount_cycles+1):
 
+            while cycle_end_time <= end_time:
+
                 if i%4 == 0:
                     
                     break_elem = longer_break
@@ -215,6 +217,7 @@ print('Welcome to Pomodoro.py with a flexible note time. '+\
 user_input = input('Please enter a time (e.g. "20:30") when you want to be done.\n')
 
 # opens browser and enters x-url-callback string
-webbrowser.open(create_pomodoro(user_input,'25min'))
+#webbrowser.open(create_pomodoro(user_input,'25min'))
 
-#create_pomodoro('20:30','25min')
+### function test ###
+create_pomodoro('20:30','25min')
