@@ -26,7 +26,6 @@ open_note = "&open_note=yes&text="
 # default title
 begin = 'bear://x-callback-url/create?title=Pomodoro%20'
 
-
 ### break strings ###
 pushup_break = 'Do'+space+'10'+space+'push-ups'
 pull_up_break = pushup_break.replace('push','pull')
@@ -137,56 +136,60 @@ def create_pomodoro(end_time, cycle):
 
         j = 0
 
-        for i in range(1,amount_cycles+1):
 
-            while cycle_end_time <= end_time:
+        # end with break before or on time supplied by user
+        while cycle_end_time < end_time:
 
-                if i%4 == 0:
-                    
-                    break_elem = longer_break
+            i = 1
 
-                    cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+\
-                                begin_time.strftime('%H:%M')+'-'+\
-                                cycle_end_time.strftime('%H:%M')+\
-                                '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
-                                cycle_end_time.strftime('%H:%M')
+            if i%4 == 0:
+                
+                break_elem = longer_break
 
-                    # changing times with +50min due to 25min doing and 25min break
-                    begin_time = begin_time + pd.Timedelta(minutes=50)
+                cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+\
+                            begin_time.strftime('%H:%M')+'-'+\
+                            cycle_end_time.strftime('%H:%M')+\
+                            '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
+                            cycle_end_time.strftime('%H:%M')
 
-                    # also, make this statement bold at the same time
-                    cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+\
-                        '%20-%3E%20'+'*'+break_elem+'*'+'%3A%3A'
+                # changing times with +50min due to 25min doing and 25min break
+                begin_time = begin_time + pd.Timedelta(minutes=50)
 
-                    cycle_end_time = cycle_end_time + pd.Timedelta(minutes=50)
+                # also, make this statement bold at the same time
+                cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+\
+                    '%20-%3E%20'+'*'+break_elem+'*'+'%3A%3A'
 
-                    content = content + cycle_content
+                cycle_end_time = cycle_end_time + pd.Timedelta(minutes=50)
+
+                content = content + cycle_content
 
 
+            else:
+                
+                break_elem = breaks[j]
+                # concatenate string with hh:mm from timestamp; +25min, +5 for break
+                cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+\
+                            begin_time.strftime('%H:%M')+'-'+\
+                            cycle_end_time.strftime('%H:%M')+\
+                            '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
+                            cycle_end_time.strftime('%H:%M')
+
+                # setting times forward for next cycle
+                begin_time = begin_time + pd.Timedelta(minutes=30)
+
+                cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+\
+                    '%20-%3E%20'+break_elem+'%3A%3A'
+
+                cycle_end_time = cycle_end_time + pd.Timedelta(minutes=30)
+
+                content = content + cycle_content
+                # setting up j for next step
+                if j < 2:
+                    j += 1
                 else:
-                    
-                    break_elem = breaks[j]
-                    # concatenate string with hh:mm from timestamp; +25min, +5 for break
-                    cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+\
-                                begin_time.strftime('%H:%M')+'-'+\
-                                cycle_end_time.strftime('%H:%M')+\
-                                '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
-                                cycle_end_time.strftime('%H:%M')
-
-                    # setting times forward for next cycle
-                    begin_time = begin_time + pd.Timedelta(minutes=30)
-
-                    cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+\
-                        '%20-%3E%20'+break_elem+'%3A%3A'
-
-                    cycle_end_time = cycle_end_time + pd.Timedelta(minutes=30)
-
-                    content = content + cycle_content
-                    # setting up j for next step
-                    if j < 2:
-                        j += 1
-                    else:
-                        j = 0
+                    j = 0
+            
+            i += 1
 
 
     else:
