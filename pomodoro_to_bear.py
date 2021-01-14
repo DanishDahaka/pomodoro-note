@@ -26,6 +26,7 @@ open_note = "&open_note=yes&text="
 # default title
 begin = 'bear://x-callback-url/create?title=Pomodoro%20'
 
+
 ### break strings ###
 pushup_break = 'Do'+space+'10'+space+'push-ups'
 pull_up_break = pushup_break.replace('push','pull')
@@ -133,14 +134,12 @@ def create_pomodoro(end_time, cycle):
         print('amount_cycles: ',amount_cycles)
 
         cycle_end_time = begin_time + pd.Timedelta(minutes=25)
-
-        j = 0
-
+        
+        # setting variables before while loop
+        i,j = 1,0
 
         # end with break before or on time supplied by user
         while cycle_end_time < end_time:
-
-            i = 1
 
             if i%4 == 0:
                 
@@ -220,7 +219,7 @@ print('Welcome to Pomodoro.py with a flexible note time. '+\
 user_input = input('Please enter a time (e.g. "20:30") when you want to be done.\n')
 
 # opens browser and enters x-url-callback string
-#webbrowser.open(create_pomodoro(user_input,'25min'))
+webbrowser.open(create_pomodoro(user_input,'25min'))
 
 ### function test ###
-create_pomodoro('20:30','25min')
+#create_pomodoro('20:30','25min')
