@@ -39,6 +39,38 @@ longer_break = 'Take'+space+'a'+space+'rest'+space+'for'+space+'25mins'+\
 # collect all breaks
 breaks = [pushup_break,pull_up_break,front_lever_break]
 
+def add_cycle_content(break_element, cycle_begin_time, cycle_end_time, cycle_number, minute_difference):
+
+    """concatenates 
+
+    Args:
+        break_element       (String):  message for break lines 
+        cycle_begin_time    (Timestamp): when the cycle starts
+        cycle_end_time      (Timestamp): end of current cycle
+        cycle_number        (integer): current cycle number
+
+    Returns:
+        cycle_content (string): the X-URL-Callback string for one cycle
+
+    """
+
+    cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(cycle_number)+'%2C%20'+\
+                            cycle_begin_time.strftime('%H:%M')+'-'+\
+                            cycle_end_time.strftime('%H:%M')+\
+                            '%0A%0A%0A---%0A%3A%3ABreak%20'+str(cycle_number)+'%2C%20'+\
+                            cycle_end_time.strftime('%H:%M')
+
+    # change times with minute difference depending on which interval is wished
+    cycle_begin_time = cycle_begin_time + pd.Timedelta(minutes=minute_difference)
+    cycle_end_time = cycle_end_time + pd.Timedelta(minutes=minute_difference)
+
+    # also, make this statement bold at the same time
+    cycle_content = cycle_content +'-'+cycle_begin_time.strftime('%H:%M')+\
+        '%20-%3E%20'+'*'+break_element+'*'+'%3A%3A'
+
+
+    return cycle_content, cycle_begin_time, cycle_end_time
+
 
 def create_pomodoro(end_time, cycle):
 
@@ -95,13 +127,14 @@ def create_pomodoro(end_time, cycle):
 
     title_continue = begin + titledate +'%20'
 
-    # dependency here on 25mins, change once 60/90mins are in the game!
+    # prepare the beginning of the X-URL-Callback String
     standard_content = '%20cycle&open_note=yes&text=%23pom'+\
         'odoro%2F25min'+space+hashtag+'diary'+slash+str(year)+slash+\
             month_prefix_zero+slash+day_prefix_zero+\
             '%0A---%0AFlow%3A%5B%5BPomodoro%20-%20Technique%5D%5D'+\
             '%0A---%0A%23%23%20Summary%0A'
-
+            
+    # adapted from https://www.huffpost.com/entry/work-life-balance-the-90_b_578671
     if cycle == '90min':
         
         # adjust tag inside the string
@@ -145,20 +178,7 @@ def create_pomodoro(end_time, cycle):
                 
                 break_elem = longer_break
 
-                cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+\
-                            begin_time.strftime('%H:%M')+'-'+\
-                            cycle_end_time.strftime('%H:%M')+\
-                            '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
-                            cycle_end_time.strftime('%H:%M')
-
-                # changing times with +50min due to 25min doing and 25min break
-                begin_time = begin_time + pd.Timedelta(minutes=50)
-
-                # also, make this statement bold at the same time
-                cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+\
-                    '%20-%3E%20'+'*'+break_elem+'*'+'%3A%3A'
-
-                cycle_end_time = cycle_end_time + pd.Timedelta(minutes=50)
+                cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, begin_time, cycle_end_time, i, 50)
 
                 content = content + cycle_content
 
@@ -166,20 +186,8 @@ def create_pomodoro(end_time, cycle):
             else:
                 
                 break_elem = breaks[j]
-                # concatenate string with hh:mm from timestamp; +25min, +5 for break
-                cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(i)+'%2C%20'+\
-                            begin_time.strftime('%H:%M')+'-'+\
-                            cycle_end_time.strftime('%H:%M')+\
-                            '%0A%0A%0A---%0A%3A%3ABreak%20'+str(i)+'%2C%20'+\
-                            cycle_end_time.strftime('%H:%M')
-
-                # setting times forward for next cycle
-                begin_time = begin_time + pd.Timedelta(minutes=30)
-
-                cycle_content = cycle_content +'-'+begin_time.strftime('%H:%M')+\
-                    '%20-%3E%20'+break_elem+'%3A%3A'
-
-                cycle_end_time = cycle_end_time + pd.Timedelta(minutes=30)
+                
+                cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, begin_time, cycle_end_time, i, 30)
 
                 content = content + cycle_content
                 # setting up j for next step
