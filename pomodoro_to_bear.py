@@ -211,7 +211,7 @@ def create_pomodoro(end_time, cycle):
         content = make_cycles(title_continue, standard_content, cycle, begin_time, end_time, 120, 150)
         
 
-    elif cycle == '60min':
+    elif cycle == '52min':
 
         # 52+17 and 52 + 34 mins, from: https://medium.com/@timmetz/pomodoro-technique-and-other-work-rhythms-which-one-suits-you-34c2d05fe46e
         content = make_cycles(title_continue, standard_content, cycle, begin_time, end_time, 69, 86)
@@ -222,7 +222,7 @@ def create_pomodoro(end_time, cycle):
         content = make_cycles(title_continue, standard_content, cycle, begin_time, end_time, 30, 50)
 
     else:
-        raise ValueError('Insert fitting value for time. Allowed values: "25min", "60min", "90min"')
+        raise ValueError('Insert fitting value for time. Allowed values: "25min", "52min", "90min"')
 
 
     return content
