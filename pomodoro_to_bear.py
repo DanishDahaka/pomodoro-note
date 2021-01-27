@@ -1,6 +1,11 @@
 import webbrowser
 import pandas as pd
 
+"""  possible extensions:
+-   put ASCII and Bear stuff in separate file and import 
+-   Make cycle duration (cd) variable and calculate break lengths based on cd (e.g. cd = 50, bl = 0.1*cd)
+"""
+
 ### ASCII encodings for X-URL-Callback-String ###
 space = "%20"
 left_bracket_round = "%28"
@@ -39,9 +44,74 @@ longer_break = 'Take'+space+'a'+space+'rest'+space+'for'+space+'25mins'+\
 # collect all breaks
 breaks = [pushup_break,pull_up_break,front_lever_break]
 
+def make_cycles(title_continue, standard_content, cycle, begin_time, end_time, short_time, long_time):
+
+    """concatenates for each cycle a new string to the main X-URL-Callback string
+
+    Args:
+        title_continue      (String): beginning of the X-URL-Callback String + title
+        standard_content    (String): custom header for Bear note
+        cycle               (String): cycle duration as string, e.g. '25min'
+        begin_time          (Timestamp): current time rounded to nearest 5mins
+        end_time            (Timestamp): converted String from user input into timestamp
+        short_time          (Integer): shortest duration for a cycle (three of these sequentially)
+        long_time           (Integer): longest duration for a cycle (once per three short ones)
+
+    Returns:
+        content             (String): the content for the entire pomodoro note
+
+    """
+
+    # preparing the string with length of cycle as text in between
+    content = title_continue + cycle + standard_content 
+    
+    # add duration of cycle time as timedelta from the first two chars of cycle, e.g. 25 from '25min'
+    cycle_end_time = begin_time + pd.Timedelta(minutes=int(cycle[:2]))
+    
+    # initialize variables before while loop
+    i,j = 1,0
+
+    # end before or on time supplied by user
+    while cycle_end_time < end_time:
+        
+        # every fourth cycle
+        if i%4 == 0:
+            
+            break_elem = longer_break
+
+            # 1 pomodoro == 25min, 5 min break, thus 30min normal cycle time
+            cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, begin_time, cycle_end_time, i, long_time)
+
+            content = content + cycle_content
+
+        # every other cycle
+        else:
+            
+            break_elem = breaks[j]
+            
+            cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, begin_time, cycle_end_time, i, short_time)
+
+            content = content + cycle_content
+
+            # circling through [0,1,2] for j to get text at breaks[j]
+            if j < 2:
+
+                j += 1
+
+            else:
+
+                j = 0
+        
+        i += 1
+    
+    print('amount_cycles: ', i)
+
+    return content
+    
+
 def add_cycle_content(break_element, cycle_begin_time, cycle_end_time, cycle_number, minute_difference):
 
-    """concatenates 
+    """concatenates for each cycle a new string to the main X-URL-Callback string
 
     Args:
         break_element       (String):  message for break lines 
@@ -125,82 +195,34 @@ def create_pomodoro(end_time, cycle):
 
     print('timediff mins: ',timediff_mins)
 
-    title_continue = begin + titledate +'%20'
+    title_continue = begin + titledate + space
 
     # prepare the beginning of the X-URL-Callback String
     standard_content = '%20cycle&open_note=yes&text=%23pom'+\
-        'odoro%2F25min'+space+hashtag+'diary'+slash+str(year)+slash+\
-            month_prefix_zero+slash+day_prefix_zero+\
+        'odoro%2F' + cycle + space + hashtag + 'diary' + slash + str(year) + slash +\
+            month_prefix_zero + slash + day_prefix_zero +\
             '%0A---%0AFlow%3A%5B%5BPomodoro%20-%20Technique%5D%5D'+\
             '%0A---%0A%23%23%20Summary%0A'
-            
+
     # adapted from https://www.huffpost.com/entry/work-life-balance-the-90_b_578671
     if cycle == '90min':
         
-        # adjust tag inside the string
-        standard_content = standard_content.replace('25min','90min')
-
-        content = title_continue + '90min' + standard_content
-
-        # 1 pomodoro == 90min, how many mins break?
-        #amount_cycles = 
-        pass
+        # no concrete duration for break given, so example uses 90+30 and 90+60
+        content = make_cycles(title_continue, standard_content, cycle, begin_time, end_time, 120, 150)
+        
 
     elif cycle == '60min':
 
-        # adjust tag inside the string
-        standard_content = standard_content.replace('25min','60min')
-
-        content = title_continue + '60min' + standard_content
-
-        # 1 pomodoro == 60min, how many mins break?
-        #amount_cycles =
-        pass
+        # 52+17 and 52 + 34 mins, from: https://medium.com/@timmetz/pomodoro-technique-and-other-work-rhythms-which-one-suits-you-34c2d05fe46e
+        content = make_cycles(title_continue, standard_content, cycle, begin_time, end_time, 69, 86)
 
     elif cycle == '25min':
 
-        
-        content = title_continue + '25min' + standard_content
-
-        # 1 pomodoro == 25min, 5 min break, thus 30min cycle
-        amount_cycles = round(timediff_mins/30)
-        print('amount_cycles: ',amount_cycles)
-
-        cycle_end_time = begin_time + pd.Timedelta(minutes=25)
-        
-        # setting variables before while loop
-        i,j = 1,0
-
-        # end with break before or on time supplied by user
-        while cycle_end_time < end_time:
-
-            if i%4 == 0:
-                
-                break_elem = longer_break
-
-                cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, begin_time, cycle_end_time, i, 50)
-
-                content = content + cycle_content
-
-
-            else:
-                
-                break_elem = breaks[j]
-                
-                cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, begin_time, cycle_end_time, i, 30)
-
-                content = content + cycle_content
-                # setting up j for next step
-                if j < 2:
-                    j += 1
-                else:
-                    j = 0
-            
-            i += 1
-
+        # the classic approach with 25+5 and 25+25 mins
+        content = make_cycles(title_continue, standard_content, cycle, begin_time, end_time, 30, 50)
 
     else:
-        raise ValueError('Insert fitting value for time')
+        raise ValueError('Insert fitting value for time. Allowed values: "25min", "60min", "90min"')
 
 
     return content
@@ -224,10 +246,12 @@ def create_pomodoro(end_time, cycle):
 print('Welcome to Pomodoro.py with a flexible note time. '+\
     '\nThe options for cycles are "25min" for now.') #"60min" and "90min" for now.')
 
-user_input = input('Please enter a time (e.g. "20:30") when you want to be done.\n')
+user_input_end = input('Please enter a time (e.g. "20:30") when you want to be done.\n')
+
+user_input_duration = input('Thanks. Please input duration of your pomodoro cycles.\n')
 
 # opens browser and enters x-url-callback string
-webbrowser.open(create_pomodoro(user_input,'25min'))
+webbrowser.open(create_pomodoro(user_input_end,user_input_duration))
 
 ### function test ###
 #create_pomodoro('20:30','25min')
