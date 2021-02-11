@@ -31,6 +31,10 @@ open_note = "&open_note=yes&text="
 # default title
 begin = 'bear://x-callback-url/create?title=Pomodoro%20'
 
+current_time = pd.Timestamp.now()
+
+
+
 
 ### break strings ###
 pushup_break = 'Do'+space+'10'+space+'push-ups'
@@ -43,6 +47,32 @@ longer_break = 'Take'+space+'a'+space+'rest'+space+'for'+space+'25mins'+\
 
 # collect all breaks
 breaks = [pushup_break,pull_up_break,front_lever_break]
+
+def create_greeting(moment):
+
+    """Prints customized welcome string based on time
+
+    Args: 
+        moment      (timestamp):  current time
+
+    Returns:
+        greeting    (string):     the final welcome string
+
+    """
+
+    if moment.hour < 12:
+
+        greeting = 'Good morning!'
+
+    elif moment.hour < 20:
+
+        greeting = 'Good evening!'
+
+    else:
+
+        greeting = 'Good night!'
+
+    return greeting
 
 def make_cycles(title_continue, standard_content, cycle, begin_time, end_time, short_time, long_time):
 
@@ -243,7 +273,7 @@ def create_pomodoro(end_time, cycle):
 #### creating the final note ####
 
 
-print('Welcome to Pomodoro.py with a flexible note time. '+\
+print(create_greeting(current_time)+'\nWelcome to Pomodoro.py with a flexible note time. '+\
     '\nThe options for cycles are "25min" for now.') #"60min" and "90min" for now.')
 
 user_input = input('Please enter a time when you want to be done and the preferred cycle duration (e.g. "20:30,52min").\n')
