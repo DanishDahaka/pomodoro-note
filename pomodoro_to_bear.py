@@ -42,7 +42,7 @@ pull_up_break = pushup_break.replace('push','pull')
 front_lever_break = 'Do'+space+'1min'+space+'front'+space+'lever'
 
 # this longer break happens after a set of four pomodoros
-longer_break = 'Take'+space+'a'+space+'rest'+space+'for'+space+'25mins'+\
+longer_break = 'Take'+space+'a'+space+'longer'+space+'rest'+\
     colon+space+'Get'+space+'some'+space+'fresh'+space+'air'
 
 # collect all breaks
@@ -109,7 +109,7 @@ def make_cycles(title_continue, standard_content, cycle, begin_time, end_time, s
             
             break_elem = longer_break
 
-            # 1 pomodoro == 25min, 5 min break, thus 30min normal cycle time
+            # concatenate strings for cycle content
             cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, begin_time, cycle_end_time, i, long_time)
 
             content = content + cycle_content
