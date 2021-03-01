@@ -3,15 +3,17 @@ import pandas as pd
 
 """  possible extensions:
 -   put ASCII and Bear stuff in separate file and import 
--   Make cycle duration (cd) variable and calculate break lengths based on cd (e.g. cd = 50, bl = 0.1*cd)
+-   Make cycle_duration duration (cd) variable and calculate break lengths based on cd (e.g. cd = 50, bl = 0.1*cd)
 """
 
 ### ASCII encodings for X-URL-Callback-String ###
+# see https://ascii.cl
 space = "%20"
 left_bracket_round = "%28"
 right_bracket_round = "%29"
 left_bracket_square = "%5B"
 right_bracket_square = "%5D"
+triangle_left_open = "%3E"
 comma = "%2C"
 colon = "%3A"
 new_line = "%0A"
@@ -28,13 +30,10 @@ and_sign = "%26"
 keep_note_closed = "&open_note=no&text="
 open_note = "&open_note=yes&text="
 
-# default title
-begin = 'bear://x-callback-url/create?title=Pomodoro%20'
+# default title for bear note
+begin = 'bear://x-callback-url/create?title=Pomodoro' + space
 
 current_time = pd.Timestamp.now()
-
-
-
 
 ### break strings ###
 pushup_break = 'Do'+space+'10'+space+'push-ups'
@@ -62,41 +61,44 @@ def create_greeting(moment):
 
     if moment.hour < 12:
 
-        greeting = 'Good morning!'
+        greeting = 'Good morning'
 
     elif moment.hour < 20:
 
-        greeting = 'Good evening!'
+        greeting = 'Good evening'
 
     else:
 
-        greeting = 'Good night!'
+        greeting = 'Good night'
 
     return greeting
 
-def make_cycles(title_continue, standard_content, cycle, begin_time, end_time, short_time, long_time):
+def make_cycles(title_continue, standard_content, cycle_duration, begin_time, end_time):
 
-    """concatenates for each cycle a new string to the main X-URL-Callback string
+    """concatenates for each cycle_duration a new string to the main X-URL-Callback string
 
     Args:
-        title_continue      (String): beginning of the X-URL-Callback String + title
-        standard_content    (String): custom header for Bear note
-        cycle               (String): cycle duration as string, e.g. '25min'
-        begin_time          (Timestamp): current time rounded to nearest 5mins
-        end_time            (Timestamp): converted String from user input into timestamp
-        short_time          (Integer): shortest duration for a cycle (three of these sequentially)
-        long_time           (Integer): longest duration for a cycle (once per three short ones)
+        title_continue      (string): beginning of the X-URL-Callback String + title
+        standard_content    (string): custom header for Bear note
+        cycle_duration      (int): cycle duration in minutes, e.g. '25'
+        begin_time          (timestamp): current time rounded to nearest 5mins
+        end_time            (timestamp): converted String from user input into timestamp
+        long_time           (int): longest duration for a cycle_duration (once per three cycles)
 
     Returns:
-        content             (String): the content for the entire pomodoro note
+        content             (string): the content for the entire pomodoro note
 
     """
+    # setting short cycle time to e.g. 25 if input was 20
+    short_time = cycle_duration * 1.2
+    long_time = cycle_duration * 2
 
-    # preparing the string with length of cycle as text in between
-    content = title_continue + cycle + standard_content 
+    # preparing the string with length of cycle_duration as text in between
+    content = title_continue + str(cycle_duration)+'min' + standard_content 
     
-    # add duration of cycle time as timedelta from the first two chars of cycle, e.g. 25 from '25min'
-    cycle_end_time = begin_time + pd.Timedelta(minutes=int(cycle[:2]))
+    # add duration to begin_time
+    cycle_end_time = begin_time + pd.Timedelta(minutes=cycle_duration)
+
     
     # initialize variables before while loop
     i,j = 1,0
@@ -110,7 +112,8 @@ def make_cycles(title_continue, standard_content, cycle, begin_time, end_time, s
             break_elem = longer_break
 
             # concatenate strings for cycle content
-            cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, begin_time, cycle_end_time, i, long_time)
+            cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, 
+                                                    begin_time, cycle_end_time, i, long_time)
 
             content = content + cycle_content
 
@@ -119,7 +122,8 @@ def make_cycles(title_continue, standard_content, cycle, begin_time, end_time, s
             
             break_elem = breaks[j]
             
-            cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, begin_time, cycle_end_time, i, short_time)
+            cycle_content, begin_time, cycle_end_time = add_cycle_content(break_elem, 
+                                                    begin_time, cycle_end_time, i, short_time)
 
             content = content + cycle_content
 
@@ -134,12 +138,13 @@ def make_cycles(title_continue, standard_content, cycle, begin_time, end_time, s
         
         i += 1
     
-    print('amount_cycles: ', i)
+    print('amount_cycles: ', i-1)
 
     return content
     
 
-def add_cycle_content(break_element, cycle_begin_time, cycle_end_time, cycle_number, minute_difference):
+def add_cycle_content(break_element, cycle_begin_time, 
+                        cycle_end_time, cycle_number, minute_difference):
 
     """concatenates for each cycle a new string to the main X-URL-Callback string
 
@@ -154,11 +159,13 @@ def add_cycle_content(break_element, cycle_begin_time, cycle_end_time, cycle_num
 
     """
 
-    cycle_content = '%0A---%0A%23%23%20Cycle%20'+str(cycle_number)+'%2C%20'+\
-                            cycle_begin_time.strftime('%H:%M')+'-'+\
-                            cycle_end_time.strftime('%H:%M')+\
-                            '%0A%0A%0A---%0A%3A%3ABreak%20'+str(cycle_number)+'%2C%20'+\
-                            cycle_end_time.strftime('%H:%M')
+    cycle_content = new_line + horizontal_line + new_line + hashtag + hashtag +space +\
+                        'Cycle' + space +str(cycle_number)+ comma + space +\
+                        cycle_begin_time.strftime('%H:%M')+'-'+\
+                        cycle_end_time.strftime('%H:%M')+\
+                        new_line + new_line + new_line + horizontal_line + \
+                        new_line + colon + colon + 'Break' + space +str(cycle_number)+\
+                        comma + space + cycle_end_time.strftime('%H:%M')
 
     # change times with minute difference depending on which interval is wished
     cycle_begin_time = cycle_begin_time + pd.Timedelta(minutes=minute_difference)
@@ -166,27 +173,27 @@ def add_cycle_content(break_element, cycle_begin_time, cycle_end_time, cycle_num
 
     # also, make this statement bold at the same time
     cycle_content = cycle_content +'-'+cycle_begin_time.strftime('%H:%M')+\
-        '%20-%3E%20'+'*'+break_element+'*'+'%3A%3A'
+        space + '-' + triangle_left_open +space +'*'+break_element+'*'+ colon + colon
 
 
     return cycle_content, cycle_begin_time, cycle_end_time
 
 
-def create_pomodoro(end_time, cycle):
+def create_pomodoro(end_time, cycle_duration):
 
     """takes an end date and creates cycles from right now (normalized to
     a 5-minute time) until the end date.
 
     Args:
-        end_date    (string): time in format "hh:mm", e.g. "20:30"
-        cycle       (string): pomodoro duration, e.g. "60min"
+        end_date        (string): time in format "hh:mm", e.g. "20:30"
+        cycle_duration  (int): pomodoro duration in mins, e.g. 60
 
     Returns:
         string
 
     # Add a section detailing what errors might be raised
     Raises:
-        ValueError: If `cycle` is not one of the defined strings.
+        ValueError: If `cycle_duration` is not one of the defined strings.
     """
 
     # rounding to the nearest 5min, beware, this can also lead to earlier time
@@ -196,6 +203,12 @@ def create_pomodoro(end_time, cycle):
     year = begin_time.year
     month = begin_time.month
     day = begin_time.day
+
+    # case next day
+    if day_change == True:
+        day = day + 1
+    else:
+        pass
 
     # prepare strings for adding tag "diary/yyyy/mm/dd"
     if day < 10:
@@ -228,31 +241,20 @@ def create_pomodoro(end_time, cycle):
     title_continue = begin + titledate + space
 
     # prepare the beginning of the X-URL-Callback String
-    standard_content = '%20cycle&open_note=yes&text=%23pom'+\
-        'odoro%2F' + cycle + space + hashtag + 'diary' + slash + str(year) + slash +\
+    standard_content = space+'cycle&open_note=yes&text='+hashtag+'pom'+\
+        'odoro' + slash + str(cycle_duration) + 'min' + space + hashtag + \
+            'diary' + slash + str(year) + slash +\
             month_prefix_zero + slash + day_prefix_zero +\
-            '%0A---%0AFlow%3A%5B%5BPomodoro%20-%20Technique%5D%5D'+\
-            '%0A---%0A%23%23%20Summary%0A'
+            new_line + '---'+ new_line + 'Flow' + colon + left_bracket_square +\
+            left_bracket_square + 'Pomodoro'+ space+ '-' + space + 'Technique'+\
+            right_bracket_square + right_bracket_square +\
+            new_line +'---' + new_line + hashtag + hashtag + space + 'Summary' + new_line
 
-    # adapted from https://www.huffpost.com/entry/work-life-balance-the-90_b_578671
-    if cycle == '90min':
-        
-        # no concrete duration for break given, so example uses 90+30 and 90+60
-        content = make_cycles(title_continue, standard_content, cycle, begin_time, end_time, 120, 150)
-        
 
-    elif cycle == '52min':
+    # use a break which is 1.3 times as long as a normal cycle
+    content = make_cycles(title_continue, standard_content, cycle_duration, 
+                            begin_time, end_time)
 
-        # 52+17 and 52 + 34 mins, from: https://medium.com/@timmetz/pomodoro-technique-and-other-work-rhythms-which-one-suits-you-34c2d05fe46e
-        content = make_cycles(title_continue, standard_content, cycle, begin_time, end_time, 69, 86)
-
-    elif cycle == '25min':
-
-        # the classic approach with 25+5 and 25+25 mins
-        content = make_cycles(title_continue, standard_content, cycle, begin_time, end_time, 30, 50)
-
-    else:
-        raise ValueError('Insert fitting value for time. Allowed values: "25min", "52min", "90min"')
 
 
     return content
@@ -271,14 +273,58 @@ def create_pomodoro(end_time, cycle):
 
 
 #### creating the final note ####
+if __name__ == '__main__':
+
+    print(create_greeting(current_time)+' to Pomodoro.py with a flexible note time.')
+
+    input_text = 'Please enter a time when you want to be done and the'+\
+                ' preferred focus time per cycle in mins (e.g. "20:30,25").'+\
+                    '\n Time per cycle should be (5,300) minutes and will be rounded to closest 5mins.'
+    try: 
+        user_input = input(input_text+'\n').split(',')
+    except: 
+        raise ValueError('Enter in the format "hh:mm",mm.')
+
+    end_time, cycle_length = user_input[0], int(user_input[1])
+
+    hours, minutes = int(end_time.split(':')[0]), int(end_time.split(':')[1])
+
+    # round to nearest multiple of 5
+    cycle_length = round(5 * (cycle_length / 5))
+
+    # minimum length 4 mins
+    try:
+        assert cycle_length > 4
+    except:
+        raise ValueError('Enter cycle length larger than 4 minutes.')
+
+    # max length capped at 301 mins
+    try:
+        assert cycle_length < 301
+    except:
+        raise ValueError('Enter cycle length up to 300 minutes.')
+
+    same_day_ts = pd.Timestamp(year = current_time.year, month = current_time.month, 
+                                day = current_time.day, hour = hours, minute=minutes) 
+
+    next_day_ts = same_day_ts + pd.Timedelta(days=1)
+    first_end_time = current_time + pd.Timedelta(minutes=cycle_length)
+
+    # dummy for yes_no functionality for now
+    day_change = False
+
+    # catching too low inputs for time with option to extend to next day
+    try: 
+        assert same_day_ts > first_end_time
+    except:
+        yes_no = input('Do you want to use Pomodoro until the next day? y/n \n')
+
+        if yes_no == "y":
+            assert next_day_ts > first_end_time
+            day_change = True
+        else:
+            raise ValueError('Enter an ending which allows for at least one cycle and ends today.')
 
 
-print(create_greeting(current_time)+'\nWelcome to Pomodoro.py with a flexible note time. '+\
-    '\nThe options for cycles are "25min" for now.') #"60min" and "90min" for now.')
-
-user_input = input('Please enter a time when you want to be done and the preferred cycle duration (e.g. "20:30,52min").\n')
-
-user_input = user_input.split(',')
-
-# opens browser and enters x-url-callback string
-webbrowser.open(create_pomodoro(user_input[0],user_input[1]))
+    # opens browser and enters x-url-callback string
+    webbrowser.open(create_pomodoro(end_time,cycle_length))
