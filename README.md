@@ -4,12 +4,19 @@ This is a repository for files with different use cases, for example the Pomodor
 
 ## pomodoro_to_bear.py
 
+### Requirements:
+
+- [Bear](www.bear.app) for MacOS or iPhone/iPad
+- [Pandas](https://pandas.pydata.org) 
+
+### Description
+
 Creates a variable length string in X-URL-Callback formatting which then creates a Bear note for Pomodoro method. Depending on when the script is executed and the user input for an ending time and duration, an amount of pomodoro slices is generated. Each slice has space for you to take notes.
 
 Currently, flexible cycle lengths in the range of [5,300] minutes are supported.
 
 
-### There are six steps in the original technique:
+### There are six steps in the original Pomodoro-Technique:
 
 1. Decide on the task to be done.
 2. Set the pomodoro timer (traditionally to 25 minutes).
