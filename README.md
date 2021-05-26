@@ -1,6 +1,6 @@
-# miscellaneous files
+# Set up custom Pomodoro notes
 
-This is a repository for files with different use cases, for example the Pomodoro-note-creator "pomodoro_to_bear.py".
+This repository contains the Pomodoro-note-creator "pomodoro_to_bear.py".
 
 ## pomodoro_to_bear.py
 
